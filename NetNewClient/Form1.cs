@@ -56,6 +56,31 @@ public partial class Form1 : Form
                 System.IO.File.WriteAllText(tempPath, textBoxServerUrl.Text ?? "");
             }
 
+            // Build WebSocket URL
+            var host = textBoxServerUrl?.Text?.TrimEnd('/') ?? string.Empty;
+            host = host.Replace("http://", "ws://");
+            host = host.Replace("https://", "wss://");
+            var apiKey = textBoxApiKey?.Text ?? string.Empty;
+            var deviceId = "1";
+            var wsUrl = $"{host}?api_key={apiKey}&deviceId={deviceId}";
+
+            logger.LogInformation($"Connecting to WebSocket: {host}");
+
+            // Connect to WebSocket (basic example)
+            using (var ws = new System.Net.WebSockets.ClientWebSocket())
+            {
+                var uri = new Uri(wsUrl);
+                var connectTask = ws.ConnectAsync(uri, System.Threading.CancellationToken.None);
+                connectTask.Wait();
+                if (ws.State == System.Net.WebSockets.WebSocketState.Open)
+                {
+                    logger.LogInformation("WebSocket connection established.");
+                }
+                else
+                {
+                    logger.LogError($"WebSocket connection failed. State: {ws.State}");
+                }
+            }
 
             var systemInfo = EmbyApiClient.GetSystemInfoAsync().Result;
             logger.LogInformation("Connected to server successfully.");
@@ -63,11 +88,7 @@ public partial class Form1 : Form
             var sessions = EmbyApiClient.GetSessionsAsync2().Result;
             logger.LogInformation("Sessions parsed successfully.");
 
-
             listBox1.DataSource = sessions;
-            
-
-
         }
         catch (Exception ex)
         {
