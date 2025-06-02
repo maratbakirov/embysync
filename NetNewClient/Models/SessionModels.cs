@@ -217,8 +217,8 @@ namespace NetNewClient.Models
         public override string ToString()
         {
             string playingInfo = NowPlayingItem != null 
-                ? $"Now Playing: {NowPlayingItem.Name}" 
-                : "Nothing playing";
+                ? $"Playing: {NowPlayingItem.Name}" 
+                : "Nothing";
             
             return $"{DeviceName} - {playingInfo}";
         }
