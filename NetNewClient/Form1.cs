@@ -1,4 +1,5 @@
 using Microsoft.Extensions.Logging;
+using System.Net.WebSockets;
 
 namespace NetNewClient;
 
@@ -13,6 +14,8 @@ public partial class Form1 : Form
 
     private EmbyApiClient? _embyApiClient = null;
     private TextBoxLogger logger;
+    private ClientWebSocket _webSocket;
+    private CancellationTokenSource _webSocketCts;
 
     private EmbyApiClient EmbyApiClient
     {
@@ -66,21 +69,43 @@ public partial class Form1 : Form
 
             logger.LogInformation($"Connecting to WebSocket: {host}");
 
-            // Connect to WebSocket (basic example)
-            using (var ws = new System.Net.WebSockets.ClientWebSocket())
-            {
-                var uri = new Uri(wsUrl);
-                var connectTask = ws.ConnectAsync(uri, System.Threading.CancellationToken.None);
-                connectTask.Wait();
-                if (ws.State == System.Net.WebSockets.WebSocketState.Open)
-                {
+            // Connect to WebSocket and add event handler
+            this._webSocket = new System.Net.WebSockets.ClientWebSocket();
+            var uri = new Uri(wsUrl);
+            
+            // Start a background task to handle incoming WebSocket messages
+            this._webSocketCts = new CancellationTokenSource();
+            Task.Run(async () => {
+                var buffer = new byte[4096];
+                try {
+                    await _webSocket.ConnectAsync(uri, _webSocketCts.Token);
                     logger.LogInformation("WebSocket connection established.");
+                    
+                    while (_webSocket.State == System.Net.WebSockets.WebSocketState.Open && !_webSocketCts.Token.IsCancellationRequested)
+                    {
+                        var receiveBuffer = new ArraySegment<byte>(buffer);
+                        var result = await _webSocket.ReceiveAsync(receiveBuffer, _webSocketCts.Token).ConfigureAwait(false);
+                        
+                        if (result.MessageType == System.Net.WebSockets.WebSocketMessageType.Close)
+                        {
+                            _webSocket
+                            .CloseAsync(System.Net.WebSockets.WebSocketCloseStatus.NormalClosure, 
+                                "Connection closed by the server", _webSocketCts.Token);
+                            logger.LogInformation("WebSocket connection closed.");
+                        }
+                        else
+                        {
+                            var message = System.Text.Encoding.UTF8.GetString(buffer, 0, result.Count);
+                            logger.LogInformation($"WebSocket message received: {message}");
+                        }
+                    }
                 }
-                else
+                catch (Exception ex)
                 {
-                    logger.LogError($"WebSocket connection failed. State: {ws.State}");
+                    logger.LogError($"WebSocket error: {ex.Message}");
                 }
-            }
+            }, _webSocketCts.Token);
+
 
             var systemInfo = EmbyApiClient.GetSystemInfoAsync().Result;
             logger.LogInformation("Connected to server successfully.");
