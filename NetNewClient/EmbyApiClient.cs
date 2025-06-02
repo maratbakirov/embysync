@@ -1,6 +1,8 @@
 using System.Net.Http;
 using System.Net.Http.Headers;
 using System.Threading.Tasks;
+using System.Text.Json;
+using NetNewClient.Models;
 
 namespace NetNewClient
 {
@@ -43,6 +45,17 @@ namespace NetNewClient
             var response = await _httpClient.GetAsync("/Sessions").ConfigureAwait(false);
             response.EnsureSuccessStatusCode();
             return await response.Content.ReadAsStringAsync().ConfigureAwait(false);
+        }
+
+        // Strongly-typed version
+        public async Task<List<Session>> GetSessionsAsync2()
+        {
+            AddApiKeyHeader();
+            var response = await _httpClient.GetAsync("/Sessions").ConfigureAwait(false);
+            response.EnsureSuccessStatusCode();
+            var json = await response.Content.ReadAsStringAsync().ConfigureAwait(false);
+            var result = JsonSerializer.Deserialize<List<Session>>(json);
+            return result ?? new List<Session>();
         }
 
         public async Task<string> GetSessionCapabilitiesAsync()

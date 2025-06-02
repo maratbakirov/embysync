@@ -28,15 +28,12 @@ partial class Form1
     /// </summary>
     private void InitializeComponent()
     {
-        ListViewItem listViewItem1 = new ListViewItem("");
-        ListViewItem listViewItem2 = new ListViewItem("");
         labelServerUrl = new Label();
         textBoxServerUrl = new TextBox();
         labelApiKey = new Label();
         textBoxApiKey = new TextBox();
         buttonConnect = new Button();
         splitContainer1 = new SplitContainer();
-        listView1 = new ListView();
         listBox1 = new ListBox();
         textBox1 = new TextBox();
         ((System.ComponentModel.ISupportInitialize)splitContainer1).BeginInit();
@@ -83,7 +80,7 @@ partial class Form1
         buttonConnect.Name = "buttonConnect";
         buttonConnect.Size = new Size(100, 30);
         buttonConnect.TabIndex = 4;
-        buttonConnect.Text = "Connect";
+        buttonConnect.Text = "Get Sessions";
         buttonConnect.UseVisualStyleBackColor = true;
         buttonConnect.Click += buttonConnect_Click;
         // 
@@ -96,7 +93,6 @@ partial class Form1
         // 
         // splitContainer1.Panel1
         // 
-        splitContainer1.Panel1.Controls.Add(listView1);
         splitContainer1.Panel1.Controls.Add(listBox1);
         // 
         // splitContainer1.Panel2
@@ -106,26 +102,14 @@ partial class Form1
         splitContainer1.SplitterDistance = 116;
         splitContainer1.TabIndex = 5;
         // 
-        // listView1
-        // 
-        listView1.Items.AddRange(new ListViewItem[] { listViewItem1, listViewItem2 });
-        listView1.Location = new Point(224, 14);
-        listView1.Name = "listView1";
-        listView1.Size = new Size(123, 64);
-        listView1.TabIndex = 1;
-        listView1.UseCompatibleStateImageBehavior = false;
-        listView1.SelectedIndexChanged += listView1_SelectedIndexChanged;
-        // 
         // listBox1
         // 
         listBox1.FormattingEnabled = true;
-        listBox1.Items.AddRange(new object[] { "1", "2", "3", "4" });
-        listBox1.Location = new Point(8, 14);
+        listBox1.Location = new Point(3, 2);
         listBox1.Name = "listBox1";
         listBox1.SelectionMode = SelectionMode.MultiExtended;
-        listBox1.Size = new Size(141, 64);
+        listBox1.Size = new Size(640, 109);
         listBox1.TabIndex = 0;
-        listBox1.SelectedIndexChanged += listBox1_SelectedIndexChanged;
         // 
         // textBox1
         // 
@@ -162,7 +146,6 @@ partial class Form1
     #endregion
 
     private SplitContainer splitContainer1;
-    private ListView listView1;
-    private ListBox listBox1;
     private TextBox textBox1;
+    private ListBox listBox1;
 }

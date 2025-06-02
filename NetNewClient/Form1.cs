@@ -11,8 +11,25 @@ public partial class Form1 : Form
     private System.Windows.Forms.Button? buttonConnect;
     private System.Windows.Forms.ListBox? listBoxStrings;
 
-    private EmbyApiClient? embyApiClient;
+    private EmbyApiClient? _embyApiClient = null;
     private TextBoxLogger logger;
+
+    private EmbyApiClient EmbyApiClient
+    {
+        get
+        {
+            if (_embyApiClient == null)
+            {
+                var baseUrl = textBoxServerUrl?.Text ?? string.Empty;
+                var apiKey = textBoxApiKey?.Text ?? string.Empty;
+                this._embyApiClient = new EmbyApiClient(baseUrl, apiKey);
+
+                this.textBoxServerUrl.Enabled = false;
+                this.textBoxApiKey.Enabled = false;
+            }
+            return this._embyApiClient;
+        }
+    }
 
     public Form1()
     {
@@ -38,18 +55,23 @@ public partial class Form1 : Form
                 var tempPath = System.IO.Path.Combine(System.IO.Path.GetTempPath(), "NetNewClient_LastServerUrl.txt");
                 System.IO.File.WriteAllText(tempPath, textBoxServerUrl.Text ?? "");
             }
-            var baseUrl = textBoxServerUrl?.Text ?? string.Empty;
-            var apiKey = textBoxApiKey?.Text ?? string.Empty;
-            this.embyApiClient = new EmbyApiClient(baseUrl, apiKey);
-            var systemInfo = embyApiClient.GetSystemInfoAsync().Result;
+
+
+            var systemInfo = EmbyApiClient.GetSystemInfoAsync().Result;
             logger.LogInformation("Connected to server successfully.");
 
-            var sessions = embyApiClient.GetSessionsAsync().Result;
+            var sessions = EmbyApiClient.GetSessionsAsync2().Result;
             logger.LogInformation("Sessions parsed successfully.");
+
+
+            listBox1.DataSource = sessions;
+            
+
+
         }
         catch (Exception ex)
         {
-           logger.LogError(ex, "Error connecting to server");
+            logger.LogError(ex, "Error connecting to server");
         }
     }
 
