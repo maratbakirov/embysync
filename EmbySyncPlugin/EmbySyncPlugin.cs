@@ -1,6 +1,7 @@
 ﻿using EmbySyncPlugin.Configuration;
 using MediaBrowser.Common.Configuration;
 using MediaBrowser.Common.Plugins;
+using MediaBrowser.Controller.Library;
 using MediaBrowser.Controller.Session;
 using MediaBrowser.Model.Logging;
 using MediaBrowser.Model.Serialization;
@@ -19,15 +20,19 @@ namespace EmbySyncPlugin
         public static EmbySyncPlugin Instance { get; private set; }
 
         private ISessionManager sessionManager;
+        private IUserManager userManager;
         private ILogger logger;
 
         public static bool testStop = false;
 
 
-        public EmbySyncPlugin(IApplicationPaths applicationPaths, IXmlSerializer xmlSerializer, ISessionManager sessionManager, ILogger logger) : base(applicationPaths, xmlSerializer)
+        public EmbySyncPlugin(IApplicationPaths applicationPaths, IXmlSerializer xmlSerializer, ISessionManager sessionManager,
+            IUserManager userManager,
+            ILogger logger) : base(applicationPaths, xmlSerializer)
         { 
             Instance = this;
             this.sessionManager = sessionManager;
+            this.userManager = userManager;
             this.logger = logger;
 
             sessionManager.PlaybackStart += SessionManager_PlaybackStart; ;
@@ -56,6 +61,17 @@ namespace EmbySyncPlugin
 
         private void SessionManager_PlaybackProgress(object sender, MediaBrowser.Controller.Library.PlaybackProgressEventArgs e)
         {
+
+            var userId = e.Session.UserId;
+            var sessionId = e.Session.Id;
+
+            var sessions = sessionManager.Sessions; // Returns a list of active sessions
+            foreach (var session in sessions)
+            {
+                var userId1 = session.UserId;
+                // You can also get the user object if needed
+            }
+
             var q = 1;
             if (testStop)
             {
